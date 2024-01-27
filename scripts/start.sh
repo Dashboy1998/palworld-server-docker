@@ -79,6 +79,14 @@ port: ${RCON_PORT}
 password: ${ADMIN_PASSWORD}
 EOL
 
+
+# -ini:PalWorldSettings:[/Script/Pal.PalGameWorldSettings]:OptionSettings='(ServerName=\"Hello World\")'"
+
+#STARTCOMMAND+=("-ini:PalWorldSettings:[/Script/Pal.PalGameWorldSettings]:OptionSettings=\"(ServerPlayerMaxNum=1)\"")
+#STARTCOMMAND+=("-ini:PalWorldSettings:[/Script/Pal.PalGameWorldSettings]:OptionSettings=\"(ExpRate=1000.000000)\"")
+#STARTCOMMAND+=("-ini:PalWorldSettings:[/Script/Pal.PalGameWorldSettings]:OptionSettings=\"(PublicPort=8212,ServerPlayerMaxNum=1)\"")
+# Only setting one var works.
+
 printf "\e[0;32m*****STARTING SERVER*****\e[0m\n"
 echo "bash -c '${STARTCOMMAND[*]}'"
 su steam -c "bash -c '${STARTCOMMAND[*]}'"
