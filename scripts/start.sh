@@ -56,7 +56,7 @@ if [ ! "$(grep -s '[^[:space:]]' /palworld/Pal/Saved/Config/LinuxServer/PalWorld
     printf "\e[0;32m*****GENERATING CONFIG*****\e[0m\n"
 
     # Server will generate all ini files after first run.
-    timeout --preserve-status 15s ./PalServer.sh 1> /dev/null
+    su steam -c "timeout --preserve-status 15s ./PalServer.sh 1> /dev/null "
 
     # Wait for shutdown
     sleep 5
@@ -82,4 +82,3 @@ EOL
 printf "\e[0;32m*****STARTING SERVER*****\e[0m\n"
 echo "bash -c '${STARTCOMMAND[*]}'"
 su steam -c "bash -c '${STARTCOMMAND[*]}'"
-
