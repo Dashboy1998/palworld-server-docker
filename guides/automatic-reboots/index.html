@@ -10,7 +10,7 @@
 
 
 <link rel="search" type="application/opensearchdescription+xml" title="Palworld Server Docker Documentation" href="/opensearch.xml"><link rel="stylesheet" href="/assets/css/styles.96d8a3ba.css">
-<script src="/assets/js/runtime~main.57ca1006.js" defer="defer"></script>
+<script src="/assets/js/runtime~main.fde9c975.js" defer="defer"></script>
 <script src="/assets/js/main.568dd1db.js" defer="defer"></script>
 </head>
 <body class="navigation-with-keyboard">
@@ -20,7 +20,7 @@
 <div class="theme-admonition theme-admonition-warning admonition_xJq3 alert alert--warning"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.893 1.5c-.183-.31-.52-.5-.887-.5s-.703.19-.886.5L.138 13.499a.98.98 0 0 0 0 1.001c.193.31.53.501.886.501h13.964c.367 0 .704-.19.877-.5a1.03 1.03 0 0 0 .01-1.002L8.893 1.5zm.133 11.497H6.987v-2.003h2.039v2.003zm0-3.004H6.987V5.987h2.039v4.006z"></path></svg></span>warning</div><div class="admonitionContent_BuS1"><p>If docker restart is not set to policy <code>always</code> or <code>unless-stopped</code>
 then the server will shutdown and will need to be manually restarted.</p><p>The example docker run command and docker compose file in <a href="https://palworld-server-docker.loef.dev/" target="_blank" rel="noopener noreferrer">the Quicksetup</a>
 already use the needed policy</p></div></div>
-<p>Set <code>AUTO_REBOOT_ENABLED</code> enable or disable automatic reboots (Default is disabled)</p>
+<p>Set <code>AUTO_REBOOT_ENABLED</code> to <code>true</code> or <code>false</code> to enable or disable automatic reboots (Default is disabled)</p>
 <p><code>AUTO_REBOOT_CRON_EXPRESSION</code> is a cron expression, in a Cron-Expression you define an interval for when to run jobs.</p>
 <div class="theme-admonition theme-admonition-tip admonition_xJq3 alert alert--success"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 12 16"><path fill-rule="evenodd" d="M6.5 0C3.48 0 1 2.19 1 5c0 .92.55 2.25 1 3 1.34 2.25 1.78 2.78 2 4v1h5v-1c.22-1.22.66-1.75 2-4 .45-.75 1-2.08 1-3 0-2.81-2.48-5-5.5-5zm3.64 7.48c-.25.44-.47.8-.67 1.11-.86 1.41-1.25 2.06-1.45 3.23-.02.05-.02.11-.02.17H5c0-.06 0-.13-.02-.17-.2-1.17-.59-1.83-1.45-3.23-.2-.31-.42-.67-.67-1.11C2.44 6.78 2 5.65 2 5c0-2.2 2.02-4 4.5-4 1.22 0 2.36.42 3.22 1.19C10.55 2.94 11 3.94 11 5c0 .66-.44 1.78-.86 2.48zM4 14h5c-.23 1.14-1.3 2-2.5 2s-2.27-.86-2.5-2z"></path></svg></span>tip</div><div class="admonitionContent_BuS1"><p>This image uses Supercronic for crons
 see <a href="https://github.com/aptible/supercronic#crontab-format" target="_blank" rel="noopener noreferrer">supercronic</a>
