@@ -154,8 +154,8 @@ DiscordMessage() {
 
 # RCON Call
 RCON() {
-  local args="$1"
-  rcon-cli -c /home/steam/server/rcon.yaml "$args"
+    local args="$1"
+    rcon-cli -c /home/steam/server/rcon.yaml "$args"
 }
 
 # Given a message this will broadcast in game
