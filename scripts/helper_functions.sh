@@ -153,8 +153,12 @@ DiscordMessage() {
 }
 
 # RCON Call
+# If RCON_ENABLED is not true then return 1 otherwise return rcon-cli exit status
 RCON() {
     local args="$1"
+    if [ "${RCON_ENABLED,,}" != true ]; then
+        return_val=1
+    fi
     rcon-cli -c /home/steam/server/rcon.yaml "$args"
 }
 
