@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkdocusaurus=self.webpackChunkdocusaurus||[]).push([[28],{7408:e=>{e.exports=JSON.parse('{"title":"Backup","slug":"/category/backup","permalink":"/de/category/backup","navigation":{"previous":{"title":"Leitf\xe4den","permalink":"/de/category/guides"},"next":{"title":"Erstellen eines Backups","permalink":"/de/guides/backup/creating-backup"}}}')}}]);

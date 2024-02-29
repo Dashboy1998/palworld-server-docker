@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdocusaurus=self.webpackChunkdocusaurus||[]).push([[301],{2898:t=>{t.exports=JSON.parse('{"title":"Primeiros passos","slug":"/category/getting-started","permalink":"/pt-PT/category/getting-started","navigation":{"next":{"title":"Configura\xe7\xe3o r\xe1pida","permalink":"/pt-PT/"}}}')}}]);

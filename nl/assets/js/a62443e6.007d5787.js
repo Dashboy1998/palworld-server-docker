@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkdocusaurus=self.webpackChunkdocusaurus||[]).push([[314],{5152:e=>{e.exports=JSON.parse('{"title":"Backup","slug":"/category/backup","permalink":"/nl/category/backup","navigation":{"previous":{"title":"Gidsen","permalink":"/nl/category/guides"},"next":{"title":"Een back-up maken","permalink":"/nl/guides/backup/creating-backup"}}}')}}]);

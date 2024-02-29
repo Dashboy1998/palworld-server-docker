@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkdocusaurus=self.webpackChunkdocusaurus||[]).push([[912],{7368:e=>{e.exports=JSON.parse('{"title":"Aan de slag","slug":"/category/getting-started","permalink":"/nl/category/getting-started","navigation":{"next":{"title":"Snelle Installatie","permalink":"/nl/"}}}')}}]);
