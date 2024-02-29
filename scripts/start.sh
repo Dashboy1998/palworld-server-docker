@@ -74,11 +74,15 @@ if [ -n "${QUERY_PORT}" ]; then
 fi
 
 if [ "${COMMUNITY,,}" = true ]; then
-    STARTCOMMAND+=("EpicApp=PalServer")
+    STARTCOMMAND+=("-publiclobby")
 fi
 
 if [ "${MULTITHREADING,,}" = true ]; then
     STARTCOMMAND+=("-useperfthreads" "-NoAsyncLoadingThread" "-UseMultithreadForDS")
+fi
+
+if [ "${RCON_ENABLED,,}" = true ]; then
+    STARTCOMMAND+=("-rcon")
 fi
 
 if [ "${DISABLE_GENERATE_SETTINGS,,}" = true ]; then
@@ -105,6 +109,9 @@ else
   /home/steam/server/compile-settings.sh || exit
 fi
 
+if [ "${DISABLE_GENERATE_ENGINE,,}" = false ]; then
+    /home/steam/server/compile-engine.sh || exit
+fi
 LogAction "GENERATING CRONTAB"
 truncate -s 0  "/home/steam/server/crontab"
 if [ "${BACKUP_ENABLED,,}" = true ]; then
@@ -152,10 +159,10 @@ if [ "${ENABLE_PLAYER_LOGGING,,}" = true ] && [[ "${PLAYER_LOGGING_POLL_PERIOD}"
 fi
 
 LogAction "Starting Server"
-DiscordMessage "${DISCORD_PRE_START_MESSAGE}" "success"
+DiscordMessage "Start" "${DISCORD_PRE_START_MESSAGE}" "success"
 
 echo "${STARTCOMMAND[*]}"
 "${STARTCOMMAND[@]}"
 
-DiscordMessage "${DISCORD_POST_SHUTDOWN_MESSAGE}" "failure"
+DiscordMessage "Start" "${DISCORD_POST_SHUTDOWN_MESSAGE}" "failure"
 exit 0
