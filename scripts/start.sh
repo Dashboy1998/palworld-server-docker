@@ -15,13 +15,12 @@ cd /palworld || exit
 # Get the architecture using dpkg
 architecture=$(dpkg --print-architecture)
 
-# Get host kernel page size
-kernel_page_size=$(getconf PAGESIZE)
+if [ "$architecture" == "arm64" ] && [ "${ARM_COMPATIBILITY_MODE,,}" = true ]; then
+    LogInfo "ARM compatibility mode enabled"
+    export DEBUGGER="/usr/bin/qemu-i386-static"
 
-# Check kernel page size for arm64 hosts before running steamcmdac
-if [ "$architecture" == "arm64" ] && [ "$kernel_page_size" != "4096" ]; then
-    LogError "Only ARM64 hosts with 4k page size is supported."
-    exit 1
+    # Arbitrary number to avoid CPU_MHZ warning due to qemu and steamcmd
+    export CPU_MHZ=2000
 fi
 
 IsInstalled
@@ -46,8 +45,26 @@ fi
 if [ "$architecture" == "arm64" ]; then
     # create an arm64 version of ./PalServer.sh
     cp ./PalServer.sh ./PalServer-arm64.sh
-    # shellcheck disable=SC2016
-    sed -i 's|\("$UE_PROJECT_ROOT\/Pal\/Binaries\/Linux\/PalServer-Linux-Test" Pal "$@"\)|LD_LIBRARY_PATH=/home/steam/steamcmd/linux64:$LD_LIBRARY_PATH box64 \1|' ./PalServer-arm64.sh
+
+    pagesize=$(getconf PAGESIZE)
+    box64_binary="box64"
+
+    case $pagesize in
+        8192)
+            LogInfo "Using Box64 for 8k pagesize"
+            box64_binary="box64-8k"
+            ;;
+        16384)
+            LogInfo "Using Box64 for 16k pagesize"
+            box64_binary="box64-16k"
+            ;;
+        65536)
+            LogInfo "Using Box64 for 64k pagesize"
+            box64_binary="box64-64k"
+            ;;
+    esac
+    
+    sed -i "s|\(\"\$UE_PROJECT_ROOT\/Pal\/Binaries\/Linux\/PalServer-Linux-Shipping\" Pal \"\$@\"\)|LD_LIBRARY_PATH=/home/steam/steamcmd/linux64:\$LD_LIBRARY_PATH $box64_binary \1|" ./PalServer-arm64.sh
     chmod +x ./PalServer-arm64.sh
     STARTCOMMAND=("./PalServer-arm64.sh")
 else
@@ -81,9 +98,8 @@ if [ "${MULTITHREADING,,}" = true ]; then
     STARTCOMMAND+=("-useperfthreads" "-NoAsyncLoadingThread" "-UseMultithreadForDS")
 fi
 
-if [ "${RCON_ENABLED,,}" = true ]; then
-    STARTCOMMAND+=("-rcon")
-fi
+LogAction "Checking for available container updates"
+container_version_check
 
 if [ "${DISABLE_GENERATE_SETTINGS,,}" = true ]; then
   LogAction "GENERATING CONFIG"
@@ -112,8 +128,10 @@ fi
 if [ "${DISABLE_GENERATE_ENGINE,,}" = false ]; then
     /home/steam/server/compile-engine.sh || exit
 fi
+
 LogAction "GENERATING CRONTAB"
 truncate -s 0  "/home/steam/server/crontab"
+
 if [ "${BACKUP_ENABLED,,}" = true ]; then
     LogInfo "BACKUP_ENABLED=${BACKUP_ENABLED,,}"
     LogInfo "Adding cronjob for auto backups"
@@ -159,10 +177,10 @@ if [ "${ENABLE_PLAYER_LOGGING,,}" = true ] && [[ "${PLAYER_LOGGING_POLL_PERIOD}"
 fi
 
 LogAction "Starting Server"
-DiscordMessage "Start" "${DISCORD_PRE_START_MESSAGE}" "success"
+DiscordMessage "Start" "${DISCORD_PRE_START_MESSAGE}" "success" "${DISCORD_PRE_START_MESSAGE_ENABLED}" "${DISCORD_PRE_START_MESSAGE_URL}"
 
 echo "${STARTCOMMAND[*]}"
 "${STARTCOMMAND[@]}"
 
-DiscordMessage "Start" "${DISCORD_POST_SHUTDOWN_MESSAGE}" "failure"
+DiscordMessage "Stop" "${DISCORD_POST_SHUTDOWN_MESSAGE}" "failure" "${DISCORD_POST_SHUTDOWN_MESSAGE_ENABLED}" "${DISCORD_POST_SHUTDOWN_MESSAGE_URL}"
 exit 0

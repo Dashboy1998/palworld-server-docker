@@ -19,7 +19,7 @@ while ! nc -z 127.0.0.1 "${RCON_PORT}"; do
 done
 
 while true; do
-    server_pid=$(pidof PalServer-Linux-Test)
+    server_pid=$(pidof PalServer-Linux-Shipping)
     if [ -n "${server_pid}" ]; then
         # Player IDs are usally 9 or 10 digits however when a player joins for the first time for a given boot their ID is temporary 00000000 (8x zeros) while loading
         # Player ID is also 00000000 (8x zeros) when in character creation
@@ -41,18 +41,24 @@ while true; do
                 <(printf '%s\n' "${current_player_list[@]}") )
         fi
 
-        # Log all players who have left
+        # Notify Discord and log all players who have left
         for player in "${players_who_left_list[@]}"; do
             player_name=$( get_playername "${player}" )
             LogInfo "${player_name} has left"
             broadcast_command "${player_name} has left"
+
+	    # Replace ${player_name} with actual player's name
+            DiscordMessage "Player Left" "${DISCORD_PLAYER_LEAVE_MESSAGE//player_name/${player_name}}" "failure" "${DISCORD_PLAYER_LEAVE_MESSAGE_ENABLED}" "${DISCORD_PLAYER_LEAVE_MESSAGE_URL}"
         done
 
-        # Log all players who have joined
+        # Notify Discord and log all players who have joined
         for player in "${players_who_joined_list[@]}"; do
             player_name=$( get_playername "${player}" )
             LogInfo "${player_name} has joined"
             broadcast_command "${player_name} has joined"
+
+            # Replace ${player_name} with actual player's name
+            DiscordMessage "Player Joined" "${DISCORD_PLAYER_JOIN_MESSAGE//player_name/${player_name}}" "success" "${DISCORD_PLAYER_JOIN_MESSAGE_ENABLED}" "${DISCORD_PLAYER_JOIN_MESSAGE_URL}"
         done
 
         old_player_list=("${current_player_list[@]}")

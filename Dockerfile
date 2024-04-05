@@ -1,4 +1,4 @@
-FROM golang:1.22.0-alpine as rcon-cli_builder
+FROM golang:1.22.2-alpine as rcon-cli_builder
 
 ARG RCON_VERSION="0.10.3"
 ARG RCON_TGZ_SHA1SUM=33ee8077e66bea6ee097db4d9c923b5ed390d583
@@ -20,7 +20,7 @@ RUN wget -q https://github.com/gorcon/rcon-cli/archive/refs/tags/v${RCON_VERSION
 FROM cm2network/steamcmd:root as base-amd64
 # Ignoring --platform=arm64 as this is required for the multi-arch build to continue to work on amd64 hosts
 # hadolint ignore=DL3029
-FROM --platform=arm64 thijsvanloef/steamcmd-arm64:root as base-arm64
+FROM --platform=arm64 sonroyaalmerol/steamcmd-arm64:root-2024-02-29 as base-arm64
 
 ARG TARGETARCH
 # Ignoring the lack of a tag here because the tag is defined in the above FROM lines
@@ -51,6 +51,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gettext-base=0.21-12 \
     xdg-user-dirs=0.18-1 \
     jo=1.9-1 \
+    jq=1.6-2.1 \
     netcat-traditional=1.10-47 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -70,6 +71,7 @@ RUN case ${TARGETARCH} in \
     && chmod +x supercronic \
     && mv supercronic /usr/local/bin/supercronic
 
+# hadolint ignore=DL3044
 ENV HOME=/home/steam \
     PORT= \
     PUID=1000 \
@@ -99,17 +101,53 @@ ENV HOME=/home/steam \
     AUTO_REBOOT_WARN_MINUTES=5 \
     AUTO_REBOOT_EVEN_IF_PLAYERS_ONLINE=false \
     AUTO_REBOOT_CRON_EXPRESSION="0 0 * * *" \
+    DISCORD_SUPPRESS_NOTIFICATIONS= \
     DISCORD_WEBHOOK_URL= \
     DISCORD_CONNECT_TIMEOUT=30 \
     DISCORD_MAX_TIMEOUT=30 \
     DISCORD_PRE_UPDATE_BOOT_MESSAGE="Server is updating..." \
+    DISCORD_PRE_UPDATE_BOOT_MESSAGE_URL= \
+    DISCORD_PRE_UPDATE_BOOT_MESSAGE_ENABLED=true \
     DISCORD_POST_UPDATE_BOOT_MESSAGE="Server update complete!" \
+    DISCORD_POST_UPDATE_BOOT_MESSAGE_URL= \
+    DISCORD_POST_UPDATE_BOOT_ENABLED=true \
     DISCORD_PRE_START_MESSAGE="Server has been started!" \
+    DISCORD_PRE_START_MESSAGE_URL= \
+    DISCORD_PRE_START_MESSAGE_ENABLED=true \
     DISCORD_PRE_SHUTDOWN_MESSAGE="Server is shutting down..." \
+    DISCORD_PRE_SHUTDOWN_MESSAGE_URL= \
+    DISCORD_PRE_SHUTDOWN_MESSAGE_ENABLED=true \
     DISCORD_POST_SHUTDOWN_MESSAGE="Server has been stopped!" \
+    DISCORD_POST_SHUTDOWN_MESSAGE_URL= \
+    DISCORD_POST_SHUTDOWN_MESSAGE_ENABLED=true \
+    DISCORD_PLAYER_JOIN_MESSAGE="player_name has joined Palworld!" \
+    DISCORD_PLAYER_JOIN_MESSAGE_URL= \
+    DISCORD_PLAYER_JOIN_MESSAGE_ENABLED=true \
+    DISCORD_PLAYER_LEAVE_MESSAGE="player_name has left Palworld." \
+    DISCORD_PLAYER_LEAVE_MESSAGE_URL= \
+    DISCORD_PLAYER_LEAVE_MESSAGE_ENABLED=true \
+    DISCORD_PRE_BACKUP_MESSAGE="Creating backup..." \
+    DISCORD_PRE_BACKUP_MESSAGE_URL= \
+    DISCORD_PRE_BACKUP_MESSAGE_ENABLED=true \
+    DISCORD_POST_BACKUP_MESSAGE="Backup created at file_path" \
+    DISCORD_POST_BACKUP_MESSAGE_URL= \
+    DISCORD_POST_BACKUP_MESSAGE_ENABLED=true \
+    DISCORD_PRE_BACKUP_DELETE_MESSAGE="Removing backups older than old_backup_days days" \
+    DISCORD_PRE_BACKUP_DELETE_MESSAGE_URL= \
+    DISCORD_PRE_BACKUP_DELETE_MESSAGE_ENABLED=true \
+    DISCORD_POST_BACKUP_DELETE_MESSAGE="Removed backups older than old_backup_days days" \
+    DISCORD_POST_BACKUP_DELETE_MESSAGE_URL= \
+    DISCORD_POST_BACKUP_DELETE_MESSAGE_ENABLED=true \
+    DISCORD_ERR_BACKUP_DELETE_MESSAGE="Unable to delete old backups, OLD_BACKUP_DAYS is not an integer. OLD_BACKUP_DAYS=old_backup_days" \
+    DISCORD_ERR_BACKUP_DELETE_MESSAGE_URL= \
+    DISCORD_ERR_BACKUP_DELETE_MESSAGE_ENABLED=true \
     ENABLE_PLAYER_LOGGING=true \
     PLAYER_LOGGING_POLL_PERIOD=5 \
+    ARM_COMPATIBILITY_MODE=false \
     DISABLE_GENERATE_ENGINE=true
+
+# Passed from Github Actions
+ARG GIT_VERSION_TAG=unspecified
 
 COPY ./scripts /home/steam/server/
 
@@ -119,6 +157,10 @@ RUN chmod +x /home/steam/server/*.sh && \
     mv /home/steam/server/restore.sh /usr/local/bin/restore
 
 WORKDIR /home/steam/server
+
+# Make GIT_VERSION_TAG file to be able to check the version
+RUN echo $GIT_VERSION_TAG > GIT_VERSION_TAG
+
 RUN touch rcon.yaml crontab && \
     mkdir -p /home/steam/Steam/package && \
     chown steam:steam /home/steam/Steam/package && \

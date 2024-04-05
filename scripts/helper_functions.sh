@@ -145,11 +145,13 @@ DiscordMessage() {
   local title="$1"
   local message="$2"
   local level="$3"
+  local enabled="$4"
+  local webhook_url="$5"
   if [ -z "$level" ]; then
     level="info"
   fi
   if [ -n "${DISCORD_WEBHOOK_URL}" ]; then
-    /home/steam/server/discord.sh "$title" "$message" "$level" &
+    /home/steam/server/discord.sh "$title" "$message" "$level" "$enabled" "$webhook_url" &
   fi
 }
 
@@ -198,7 +200,7 @@ shutdown_server() {
     local return_val=0
     # Do not shutdown if not able to save
     if save_server; then
-        if ! RCON "DoExit"; then
+        if ! RCON "Shutdown 1"; then
             return_val=1
         fi
     else
@@ -260,4 +262,29 @@ countdown_message() {
         fi
     fi
     return "$return_val"
+}
+
+container_version_check() {
+    local current_version
+    local latest_version
+
+    current_version=$(cat /home/steam/server/GIT_VERSION_TAG)
+    latest_version=$(get_latest_version)
+
+    if [ "${current_version}" != "${latest_version}" ]; then
+        LogWarn "New version available: ${latest_version}"
+        LogWarn "Learn how to update the container: https://palworld-server-docker.loef.dev/guides/update-the-container"
+    else
+        LogSuccess "The container is up to date!"
+
+    fi
+}
+# Get latest release version from thijsvanloef/palworld-server-docker repository
+# Returns the latest release version
+get_latest_version() {
+    local latest_version
+
+    latest_version=$(curl https://api.github.com/repos/thijsvanloef/palworld-server-docker/releases/latest -s | jq .name -r)
+
+    echo "$latest_version"
 }
