@@ -192,7 +192,7 @@ REST_API(){
 RCON() {
     local args="$1"
     if [ "${RCON_ENABLED,,}" != true ]; then
-        return_val=1
+        return 1
     fi
     rcon-cli -c /home/steam/server/rcon.yaml "$args"
 }
@@ -240,6 +240,7 @@ shutdown_server() {
     local return_val=0
     # Do not shutdown if not able to save
     if save_server; then
+        LogAction "Shutting Down Server"
         if ! RCON "Shutdown 1"; then
             return_val=1
         fi
