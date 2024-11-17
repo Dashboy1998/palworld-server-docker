@@ -15,14 +15,6 @@ cd /palworld || exit
 # Get the architecture using dpkg
 architecture=$(dpkg --print-architecture)
 
-if [ "$architecture" == "arm64" ] && [ "${ARM_COMPATIBILITY_MODE,,}" = true ]; then
-    LogInfo "ARM compatibility mode enabled"
-    export DEBUGGER="/usr/bin/qemu-i386-static"
-
-    # Arbitrary number to avoid CPU_MHZ warning due to qemu and steamcmd
-    export CPU_MHZ=2000
-fi
-
 IsInstalled
 ServerInstalled=$?
 if [ "$ServerInstalled" == 1 ]; then
@@ -45,26 +37,8 @@ fi
 if [ "$architecture" == "arm64" ]; then
     # create an arm64 version of ./PalServer.sh
     cp ./PalServer.sh ./PalServer-arm64.sh
-
-    pagesize=$(getconf PAGESIZE)
-    box64_binary="box64"
-
-    case $pagesize in
-        8192)
-            LogInfo "Using Box64 for 8k pagesize"
-            box64_binary="box64-8k"
-            ;;
-        16384)
-            LogInfo "Using Box64 for 16k pagesize"
-            box64_binary="box64-16k"
-            ;;
-        65536)
-            LogInfo "Using Box64 for 64k pagesize"
-            box64_binary="box64-64k"
-            ;;
-    esac
     
-    sed -i "s|\(\"\$UE_PROJECT_ROOT\/Pal\/Binaries\/Linux\/PalServer-Linux-Shipping\" Pal \"\$@\"\)|LD_LIBRARY_PATH=/home/steam/steamcmd/linux64:\$LD_LIBRARY_PATH $box64_binary \1|" ./PalServer-arm64.sh
+    sed -i "s|\(\"\$UE_PROJECT_ROOT\/Pal\/Binaries\/Linux\/PalServer-Linux-Shipping\" Pal \"\$@\"\)|LD_LIBRARY_PATH=/home/steam/steamcmd/linux64:\$LD_LIBRARY_PATH /usr/local/bin/box64 \1|" ./PalServer-arm64.sh
     chmod +x ./PalServer-arm64.sh
     STARTCOMMAND=("./PalServer-arm64.sh")
 else
@@ -153,9 +127,8 @@ if [ "${AUTO_REBOOT_ENABLED,,}" = true ] && [ "${RCON_ENABLED,,}" = true ]; then
     supercronic -quiet -test "/home/steam/server/crontab" || exit
 fi
 
-if { [ "${AUTO_UPDATE_ENABLED,,}" = true ] && [ "${UPDATE_ON_BOOT,,}" = true ]; } || [ "${BACKUP_ENABLED,,}" = true ] || \
-    [ "${AUTO_REBOOT_ENABLED,,}" = true ]; then
-    supercronic "/home/steam/server/crontab" &
+if [ -s "/home/steam/server/crontab" ]; then
+    supercronic -passthrough-logs "/home/steam/server/crontab" &
     LogInfo "Cronjobs started"
 else
     LogInfo "No Cronjobs found"
@@ -168,7 +141,7 @@ default:
   password: "${ADMIN_PASSWORD}"
 EOL
 
-if [ "${ENABLE_PLAYER_LOGGING,,}" = true ] && [[ "${PLAYER_LOGGING_POLL_PERIOD}" =~ ^[0-9]+$ ]] && [ "${RCON_ENABLED,,}" = true ]; then
+if [ "${ENABLE_PLAYER_LOGGING,,}" = true ] && [[ "${PLAYER_LOGGING_POLL_PERIOD}" =~ ^[0-9]+$ ]] && { [ "${REST_API_ENABLED,,}" = true ] || [ "${RCON_ENABLED,,}" = true ] ;} then
     if [[ "$(id -u)" -eq 0 ]]; then
         su steam -c /home/steam/server/player_logging.sh &
     else

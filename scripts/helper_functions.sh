@@ -76,17 +76,30 @@ isExecutable() {
     return "$return_val"
 }
 
-# Lists players
-# Outputs nothing if RCON is not enabled and returns 1
-# Outputs player list if RCON is enabled and returns 0
-get_players_list() {
-    local return_val=0
-    if [ "${RCON_ENABLED,,}" != true ]; then
-        return_val=1
-    fi
+# Convert player list from JSON format
+convert_JSON_to_CSV_players() {
+    echo 'name,playeruid,steamid'
+    echo -n "${1}" | \
+        jq -r '.players[] | [ .name, .playerId, .userId ] | @csv' | \
+        sed -re 's/"None"/"00000000000000000000000000000000"/' \
+        -re 's/"steam_/"/' \
+        -re 's/"//g'
+}
 
-    RCON "ShowPlayers"
-    return "$return_val"
+# Lists players
+# Outputs nothing if REST API or RCON is not enabled and returns 1
+# Outputs player list if REST API or RCON is enabled and returns 0
+get_players_list() {
+    # Prefer REST API
+    if [ "${REST_API_ENABLED,,}" = true ]; then
+        convert_JSON_to_CSV_players "$(REST_API players)"
+        return 0
+    fi
+    if [ "${RCON_ENABLED,,}" = true ]; then
+        RCON "ShowPlayers"
+        return 0
+    fi
+    return 1
 }
 
 # Checks how many players are currently connected
@@ -155,6 +168,25 @@ DiscordMessage() {
   fi
 }
 
+# REST API Call
+REST_API(){
+    local -r api="${1}"
+    local -r data="${2}"
+    local -r url="http://localhost:${REST_API_PORT}/v1/api/${api}"
+    local -r accept="Accept: application/json"
+    local -r userpass="admin:${ADMIN_PASSWORD}"
+    local -r post_api="save|stop"
+    local -i result=0
+    if [ "${data}" = "" ] && [[ ! ${api} =~ ${post_api} ]]; then
+        curl -s -L -X GET  "${url}" -H "${accept}" -u "${userpass}"
+        result=$?
+    else
+        curl -s -L -X POST "${url}" -H "${accept}" -u "${userpass}" --json "${data}"
+        result=$?
+    fi
+    return ${result}
+}
+
 # RCON Call
 # If RCON_ENABLED is not true then return 1 otherwise return rcon-cli exit status
 RCON() {
@@ -171,6 +203,14 @@ RCON() {
 # Returns 1 if not able to broadcast
 broadcast_command() {
     local return_val=0
+    if [ "${REST_API_ENABLED,,}" = true ]; then
+        local json="{\"message\":\"${1}\"}" result
+        result="$(REST_API announce "${json}")"
+        if [ ! "${result}" = "OK" ]; then
+            return_val=1
+        fi
+        return "$return_val"
+    fi
     # Replaces spaces with underscore
     local message="${1// /_}"
     if [[ $TEXT = *[![:ascii:]]* ]]; then
@@ -288,3 +328,4 @@ get_latest_version() {
 
     echo "$latest_version"
 }
+

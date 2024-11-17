@@ -72,8 +72,10 @@ For example:
 | AUTO_RESET_GUILD_NO_ONLINE_PLAYERS        | Automatically reset guild when no players are online           | False                                                                                        | Bool                                   |
 | AUTO_RESET_GUILD_TIME_NO_ONLINE_PLAYERS   | Time to automatically reset guild when no players are online   | 72.000000                                                                                    | Float                                  |
 | GUILD_PLAYER_MAX_NUM                      | Max player of Guild                                            | 20                                                                                           | Integer                                |
+| BASE_CAMP_MAX_NUM_IN_GUILD                | Max bases of Guild                                             | 4                                                                                            | Integer                                |
 | PAL_EGG_DEFAULT_HATCHING_TIME             | Time(h) to incubate massive egg                                | 72.000000                                                                                    | Float                                  |
 | WORK_SPEED_RATE                           | Work speed muliplier                                           | 1.000000                                                                                     | Float                                  |
+| AUTO_SAVE_SPAN                            | Time between autosaves (seconds)                               | 30.000000                                                                                    | Float                                  |
 | IS_MULTIPLAY                              | Enable multiplayer                                             | False                                                                                        | Boolean                                |
 | IS_PVP                                    | Enable PVP                                                     | False                                                                                        | Boolean                                |
 | CAN_PICKUP_OTHER_GUILD_DEATH_PENALTY_DROP | Allow players from other guilds to pick up death penalty items | False                                                                                        | Boolean                                |
@@ -82,16 +84,23 @@ For example:
 | IS_START_LOCATION_SELECT_BY_MAP           | Enable selecting of start location                             | True                                                                                         | Boolean                                |
 | EXIST_PLAYER_AFTER_LOGOUT                 | Toggle for deleting players when they log off                  | False                                                                                        | Boolean                                |
 | ENABLE_DEFENSE_OTHER_GUILD_PLAYER         | Allows defense against other guild players                     | False                                                                                        | Boolean                                |
+| INVISIBLE_OTHER_GUILD_BASE_CAMP_AREA_FX   | unknown                                                        | False                                                                                        | Boolean                                |
 | COOP_PLAYER_MAX_NUM                       | Maximum number of players in a guild                           | 4                                                                                            | Integer                                |
 | REGION                                    | Region                                                         |                                                                                              | String                                 |
 | USEAUTH                                   | Use authentication                                             | True                                                                                         | Boolean                                |
 | BAN_LIST_URL                              | Which ban list to use                                          | [https://api.palworldgame.com/api/banlist.txt](https://api.palworldgame.com/api/banlist.txt) | string                                 |
 | SHOW_PLAYER_LIST                          | Enable show player list                                        | True                                                                                         | Boolean                                |
+| SUPPLY_DROP_SPAN                          | Interval for supply drop (minutes)                            | 180                                                                                          | Integer                                |
 | TARGET_MANIFEST_ID | Locks game version to corespond with Manfiest ID from Steam Download Depot. | | See [Manifest ID Table](https://palworld-server-docker.loef.dev/guides/pinning-game-version) |
 | ENABLE_PLAYER_LOGGING      | Enables Logging and announcing when players join and leave | true         | true/false |
 | PLAYER_LOGGING_POLL_PERIOD          | Polling period (in seconds) to check for players who have joined or left | 5                      | !0 |
 
 ### Manually
+
+:::info
+Manually changing the `PalWorldSettings.ini` requires you to set `DISABLE_GENERATE_SETTINGS` to `true`
+in the environment settings
+:::
 
 When the server starts, a `PalWorldSettings.ini` file will be created in the following location: `<mount_folder>/Pal/Saved/Config/LinuxServer/PalWorldSettings.ini`
 
